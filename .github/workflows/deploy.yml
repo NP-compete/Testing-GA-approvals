@@ -16,9 +16,21 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           body: "Deployment initiated"
 
-  trigger:
+  trigger-deployment:
     runs-on: ubuntu-latest
 
     steps:
       - name: Trigger CodePipeline
         run: echo "Triggering CodePipeline"
+
+  close-issue:
+    needs: [trigger-deployment]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Close Issue
+        if: ${{ needs.trigger-deployment.result == 'success' }}
+        uses: peter-evans/close-issue@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          comment: "Deployment complete"
