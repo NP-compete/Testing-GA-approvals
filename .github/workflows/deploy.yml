@@ -17,10 +17,12 @@ jobs:
           body: "Deployment initiated"
 
   trigger-deployment:
+    needs: [parse-approvals]
     runs-on: ubuntu-latest
 
     steps:
       - name: Trigger CodePipeline
+        if: ${{ needs.parse-approvals.result == 'success' }}
         run: echo "Triggering CodePipeline"
 
   close-issue:
