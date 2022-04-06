@@ -1,0 +1,24 @@
+name: Trigger Deployment
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  parse-approvals:
+    if: ${{ github.event.comment.body == 'Approved' || github.event.issue.pull_request == 'Approved' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: "Deployment initiated"
+
+  trigger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger CodePipeline
+        run: echo "Triggering CodePipeline"
