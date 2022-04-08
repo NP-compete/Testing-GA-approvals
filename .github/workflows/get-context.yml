@@ -1,7 +1,8 @@
 name: Context
 
 on:
-  workflow_dispatch:
+  issue_comment:
+  types: [created]
 
 jobs:
   get-context:
