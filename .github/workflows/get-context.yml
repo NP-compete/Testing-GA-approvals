@@ -2,7 +2,7 @@ name: Context
 
 on:
   issue_comment:
-  types: [created]
+    types: [created]
 
 jobs:
   get-context:
