@@ -16,4 +16,4 @@ jobs:
     steps:
       - name: Get issue name
         if: ${{ github.event.issue.label }} == 'deployment-requested' || ${{ !github.event.issue.pull_request }}
-        run: echo {{ github.event.issue.title }} 
+        run: 'echo ${{ github.event.issue.title }}'
