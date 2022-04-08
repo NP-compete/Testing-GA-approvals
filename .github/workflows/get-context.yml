@@ -14,4 +14,4 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
       - name: Get environment
         if: github.event.issue.label == 'deployment-requested'
-        run: github.event.issue.title
+        run: echo {{ github.event.issue.title }} 
