@@ -1,0 +1,13 @@
+name: Context
+
+on:
+  workflow_dispatch:
+
+jobs:
+  get-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: View the github context
+        run: echo "$GITHUB_CONTEXT"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}

@@ -5,10 +5,23 @@ on:
     types: [created]
 
 jobs:
+  get-context:
+    runs-on: ubuntu-latest
+    steps:
+      - name: View the github context
+        run: echo "$GITHUB_CONTEXT"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+  get-environment:
+    if: github.event.issue.label == 'deployment-requested'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get environment
+        run: echo "Triggering CodePipeline"
+
   parse-approvals:
     if: ${{ github.event.comment.body == 'Approved' || github.event.issue.pull_request == 'Approved' }}
-    runs-on: ubuntu-latest
-
+  
     steps:
       - name: Comment
         uses: peter-evans/create-or-update-comment@v1

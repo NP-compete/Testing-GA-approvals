@@ -1,6 +1,6 @@
 ---
 title: Deployment Approval Required for {{ env.ENVIRONMENT }}
-labels: deployment-requested
+labels: deployment-requested, {{ env.ENVIRONMENT }}
 ---
 
 Deployment Approval requested from {{ payload.sender.login }}.
