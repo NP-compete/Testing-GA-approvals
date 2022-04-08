@@ -8,10 +8,6 @@ jobs:
   get-context:
     runs-on: ubuntu-latest
     steps:
-      - name: View the github context
-        run: echo "$GITHUB_CONTEXT"
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
       - name: Get environment
         if: github.event.issue.label == 'deployment-requested'
         run: echo {{ github.event.issue.title }} 
