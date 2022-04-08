@@ -21,7 +21,7 @@ jobs:
 
   parse-approvals:
     if: ${{ github.event.comment.body == 'Approved' || github.event.issue.pull_request == 'Approved' }}
-  
+    runs-on: ubuntu-latest
     steps:
       - name: Comment
         uses: peter-evans/create-or-update-comment@v1
