@@ -5,11 +5,6 @@ on:
     types: [created]
 
 jobs:
-  event_name:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get event name
-        run: echo "event name is:" ${{ github.event_name }} 
 
   issue_name:
     runs-on: ubuntu-latest
