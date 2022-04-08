@@ -2,9 +2,6 @@ name: Approval
 
 on:
   workflow_dispatch:
-    branches:
-      - develop
-      - release
     inputs:
       environment:
         type: choice
@@ -21,8 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
       - name: Create issue
+        if: github.ref == 'refs/heads/release*' or github.ref == 'refs/heads/develop' 
         uses: JasonEtco/create-an-issue@v2.6.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
