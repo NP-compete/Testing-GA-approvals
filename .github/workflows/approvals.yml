@@ -2,6 +2,15 @@ name: Approval
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'The environment to deploy to'     
+        required: true
+        options: 
+        - Dev
+        - Test
+        - Pre-prod
+
 
 jobs:
   approvals:
@@ -13,6 +22,7 @@ jobs:
         uses: JasonEtco/create-an-issue@v2.6.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RUNNUMBER: ${{ github.run_number}}
+          ENVIRONMENT: ${{ github.event.inputs.name }}
+          RUN_NUMBER: ${{ github.run_number}}
         with:
           filename: .github/approvals.md
