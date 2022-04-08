@@ -7,11 +7,7 @@ on:
         type: choice
         description: 'The environment to deploy to'     
         required: true
-        options: 
-        - Dev
-        - Test
-        - Pre-prod
-
+        options: [ 'Test', 'Pre-prod']
 
 jobs:
   approvals:
