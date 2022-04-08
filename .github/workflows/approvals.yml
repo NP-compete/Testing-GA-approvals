@@ -2,6 +2,9 @@ name: Approval
 
 on:
   workflow_dispatch:
+    branches:
+      - develop
+      - release
     inputs:
       environment:
         type: choice
