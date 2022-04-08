@@ -5,9 +5,15 @@ on:
     types: [created]
 
 jobs:
-  get-context:
+  event_name:
     runs-on: ubuntu-latest
     steps:
-      - name: Get environment
-        if: github.event.issue.label == 'deployment-requested'
+      - name: Get event name
+        run: echo "event name is:" ${{ github.event_name }} 
+
+  issue_name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get issue name
+        if: ${{ github.event.issue.label }} == 'deployment-requested' || ${{ !github.event.issue.pull_request }}
         run: echo {{ github.event.issue.title }} 
