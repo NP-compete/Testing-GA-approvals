@@ -21,7 +21,7 @@ on:
         required: true
         options: ['us-west-2', 'eu-west-1']
         default: 'eu-west-1'
-      ARTIFACT_KEY:
+      DEPLOYMENT_ARTIFACT:
         description: 'The S3 key of the artifact to deploy'
         required: false
         type: string
@@ -32,7 +32,7 @@ env:
     OPERATION: ${{ github.event.inputs.OPERATION }}
     REGION: ${{ github.event.inputs.REGION }}
     SERVICE: ${{ secrets.SERVICE }} # Valid values: ["notif", "zeus"]
-    DEPLOYMENT_ARTIFACT: ${{ github.event.inputs.ARTIFACT_KEY }}
+    DEPLOYMENT_ARTIFACT: ${{ github.event.inputs.DEPLOYMENT_ARTIFACT }}
     BUILD_DISABLED: ${{ secrets.BUILD_DISABLED }}
 
 jobs:
@@ -55,7 +55,7 @@ jobs:
           aws-region: ${{ env.REGION }}
 
   CodeBuild:
-    if: ${{ github.event.inputs.OPERATION  == 'build' }} && ${{ secrets.BUILD_DISABLED != 'true' }}
+    if: ${{ github.event.inputs.OPERATION  == 'build' }}
     runs-on: ubuntu-latest
     steps:
       - name: Extract branch name
@@ -67,13 +67,13 @@ jobs:
           aws codebuild update-project --name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --source-version '${{ steps.extract_branch.outputs.branch }}'
           aws codebuild start-build --project-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --region='${{ env.REGION }}'
       
-  # Deploy_with_Artifact:
-  #    if: ${{ OPERATION == 'deploy' }} && ${{ DEPLOYMENT_ARTIFACT != '' }}
-  #    runs-on : ubuntu-latest
-  #    steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         token: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: Trigger CodeDeploy
-  #       run: aws deploy create-deployment --application-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-app' --deployment-group-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-deployment-group' --s3-location bucket='${{ env.ENVIRONMENT }}-${{ env.REGION }}-artifact-bucket',key='${{ env.DEPLOYMENT_ARTIFACT }}',bundleType=zip --region='${{ github.event.inputs.REGION }}'
+  CodeDeploy_with_Artifact:
+     if: ${{ github.event.inputs.OPERATION == 'deploy' }} && ${{ github.event.inputs.DEPLOYMENT_ARTIFACT != '' }}
+     runs-on : ubuntu-latest
+     steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Trigger CodeDeploy
+        run: aws deploy create-deployment --application-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-app' --deployment-group-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-deployment-group' --s3-location bucket='${{ env.ENVIRONMENT }}-${{ env.REGION }}-artifact-bucket',key='${{ env.DEPLOYMENT_ARTIFACT }}',bundleType=zip --region='${{ github.event.inputs.REGION }}'
       
