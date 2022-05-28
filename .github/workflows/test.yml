@@ -46,11 +46,10 @@ jobs:
      runs-on : ubuntu-latest
      steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
   
   AWS_Login:
     runs-on: ubuntu-latest
+    needs: [Checkout]
     steps:
       - name: Configure AWS credentials - dev
         if: env.ENVIRONMENT == 'dev'
@@ -63,6 +62,7 @@ jobs:
   CodeBuild:
     if: ${{ github.event.inputs.OPERATION  == 'build' }}
     runs-on: ubuntu-latest
+    needs: [AWS_Login]
     steps:
       - name: Extract branch name
         shell: bash
@@ -76,6 +76,7 @@ jobs:
   CodeDeploy_with_Artifact:
      if: ${{ github.event.inputs.OPERATION == 'deploy' && github.event.inputs.DEPLOYMENT_ARTIFACT != '' }}
      runs-on : ubuntu-latest
+     needs: [AWS_Login]
      steps:
       - name: Trigger CodeDeploy
         run: aws deploy create-deployment --application-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-app' --deployment-group-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-deployment-group' --s3-location bucket='${{ env.ENVIRONMENT }}-${{ env.REGION }}-artifact-bucket',key='${{ env.DEPLOYMENT_ARTIFACT }}',bundleType=zip --region='${{ github.event.inputs.REGION }}'
@@ -83,6 +84,7 @@ jobs:
   CodeDeploy_with_CommitID:
      if: ${{ github.event.inputs.OPERATION == 'deploy' && github.event.inputs.DEPLOYMENT_COMMIT != '' }}
      runs-on : ubuntu-latest
+     needs: [AWS_Login]
      steps:
       - name: Trigger CodeDeploy
         run: echo "Running using commit"
