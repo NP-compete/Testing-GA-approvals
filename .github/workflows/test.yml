@@ -55,7 +55,7 @@ jobs:
           aws-region: ${{ env.REGION }}
 
   CodeBuild:
-    if: ${{ env.OPERATION  == 'build' }}
+    if: ${{ github.event.inputs.OPERATION  == 'build' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout codebase
