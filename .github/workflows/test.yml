@@ -28,9 +28,6 @@ on:
         default: ''
 
 env:
-    ENVIRONMENT: ${{ github.event.inputs.ENVIRONMENT }}
-    OPERATION: ${{ github.event.inputs.OPERATION }}
-    REGION: ${{ github.event.inputs.REGION }}
     SERVICE: ${{ secrets.SERVICE }} # Valid values: ["notif", "zeus"]
     DEPLOYMENT_ARTIFACT: ${{ github.event.inputs.ARTIFACT_KEY }}
     BUILD_DISABLED: ${{ secrets.BUILD_DISABLED }}
@@ -46,7 +43,7 @@ jobs:
   AWS_Login:
     runs-on: ubuntu-latest
     steps:
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials - dev
         if: env.ENVIRONMENT == 'dev'
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -54,21 +51,20 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY_STAGE }}
           aws-region: ${{ env.REGION }}
 
-  # CodeBuild:
-  #   if: ${{ OPERATION  == 'build' }} && ${{ BUILD_DISABLED != 'true' }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #       with:
-  #         token: ${{ secrets.TOKEN_GITHUB }}
-  #     - name: Extract branch name
-  #       shell: bash
-  #       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-  #       id: extract_branch
-  #     - name: Trigger CodeBuild
-  #       run: |
-  #         aws codebuild update-project --name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --source-version '${{ steps.extract_branch.outputs.branch }}'
-  #         aws codebuild start-build --project-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --region='${{ env.REGION }}'
+  CodeBuild:
+    if: ${{ env.OPERATION  == 'build' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v3
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+      - name: Trigger CodeBuild
+        run: |
+          aws codebuild update-project --name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --source-version '${{ steps.extract_branch.outputs.branch }}'
+          aws codebuild start-build --project-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --region='${{ env.REGION }}'
       
   # Deploy_with_Artifact:
   #    if: ${{ OPERATION == 'deploy' }} && ${{ DEPLOYMENT_ARTIFACT != '' }}
