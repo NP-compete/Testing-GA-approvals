@@ -55,7 +55,7 @@ jobs:
           aws-region: ${{ env.REGION }}
 
   CodeBuild:
-    if: ${{ github.event.inputs.OPERATION  == 'build' }}
+    if: ${{ github.event.inputs.OPERATION  == 'build' }} && ${{ secrets.BUILD_DISABLED != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Extract branch name
