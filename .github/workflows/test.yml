@@ -54,7 +54,7 @@ jobs:
           aws-region: ${{ env.REGION }}
 
   CodeBuild:
-    if: ${{ env.OPERATION  == 'build' }} && ${{ env.BUILD_DISABLED != 'true' }}
+    if: ${{ OPERATION  == 'build' }} && ${{ BUILD_DISABLED != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -70,7 +70,7 @@ jobs:
           aws codebuild start-build --project-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --region='${{ env.REGION }}'
       
   Deploy_with_Artifact:
-     if: ${{ env.OPERATION == 'deploy' }} && ${{ env.DEPLOYMENT_ARTIFACT != '' }}
+     if: ${{ OPERATION == 'deploy' }} && ${{ DEPLOYMENT_ARTIFACT != '' }}
      runs-on : ubuntu-latest
      steps:
       - uses: actions/checkout@v3
