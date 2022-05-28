@@ -74,14 +74,14 @@ jobs:
           aws codebuild start-build --project-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --region='${{ env.REGION }}'
       
   CodeDeploy_with_Artifact:
-     if: ${{ github.event.inputs.OPERATION == 'deploy' }} && ${{ github.event.inputs.DEPLOYMENT_ARTIFACT != '' }} && ${{ github.event.inputs.DEPLOYMENT_COMMIT == '' }}
+     if: ${{ github.event.inputs.OPERATION == 'deploy' }} || ${{ github.event.inputs.DEPLOYMENT_ARTIFACT != '' }} || ${{ github.event.inputs.DEPLOYMENT_COMMIT == '' }}
      runs-on : ubuntu-latest
      steps:
       - name: Trigger CodeDeploy
         run: aws deploy create-deployment --application-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-app' --deployment-group-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-deployment-group' --s3-location bucket='${{ env.ENVIRONMENT }}-${{ env.REGION }}-artifact-bucket',key='${{ env.DEPLOYMENT_ARTIFACT }}',bundleType=zip --region='${{ github.event.inputs.REGION }}'
 
   CodeDeploy_with_CommitID:
-     if: ${{ github.event.inputs.OPERATION == 'deploy' }} && ${{ github.event.inputs.DEPLOYMENT_ARTIFACT == '' }} && ${{ github.event.inputs.DEPLOYMENT_COMMIT != '' }}
+     if: ${{ github.event.inputs.OPERATION == 'deploy' }} || ${{ github.event.inputs.DEPLOYMENT_ARTIFACT == '' }} || ${{ github.event.inputs.DEPLOYMENT_COMMIT != '' }}
      runs-on : ubuntu-latest
      steps:
       - name: Trigger CodeDeploy
