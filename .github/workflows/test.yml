@@ -26,6 +26,11 @@ on:
         required: false
         type: string
         default: ''
+      DEPLOYMENT_COMMIT:
+        description: 'The commitID of the github commit to deploy'
+        required: false
+        type: string
+        default: ''
 
 env:
     ENVIRONMENT: ${{ github.event.inputs.ENVIRONMENT }}
@@ -33,6 +38,7 @@ env:
     REGION: ${{ github.event.inputs.REGION }}
     SERVICE: ${{ secrets.SERVICE }} # Valid values: ["notif", "zeus"]
     DEPLOYMENT_ARTIFACT: ${{ github.event.inputs.DEPLOYMENT_ARTIFACT }}
+    DEPLOYMENT_COMMIT: ${{ github.event.inputs.DEPLOYMENT_COMMIT }}
     BUILD_DISABLED: ${{ secrets.BUILD_DISABLED }}
 
 jobs:
@@ -68,12 +74,16 @@ jobs:
           aws codebuild start-build --project-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --region='${{ env.REGION }}'
       
   CodeDeploy_with_Artifact:
-     if: ${{ github.event.inputs.OPERATION == 'deploy' }} && ${{ github.event.inputs.DEPLOYMENT_ARTIFACT != '' }}
+     if: ${{ github.event.inputs.OPERATION == 'deploy' }} && ${{ github.event.inputs.DEPLOYMENT_ARTIFACT != '' }} && ${{ github.event.inputs.DEPLOYMENT_COMMIT == '' }}
      runs-on : ubuntu-latest
      steps:
-      - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Trigger CodeDeploy
         run: aws deploy create-deployment --application-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-app' --deployment-group-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-deployment-group' --s3-location bucket='${{ env.ENVIRONMENT }}-${{ env.REGION }}-artifact-bucket',key='${{ env.DEPLOYMENT_ARTIFACT }}',bundleType=zip --region='${{ github.event.inputs.REGION }}'
+
+  CodeDeploy_with_commit:
+     if: ${{ github.event.inputs.OPERATION == 'deploy' }} && ${{ github.event.inputs.DEPLOYMENT_ARTIFACT == '' }} && ${{ github.event.inputs.DEPLOYMENT_COMMIT != '' }}
+     runs-on : ubuntu-latest
+     steps:
+      - name: Trigger CodeDeploy
+        run: echo "Running using commit"
       
