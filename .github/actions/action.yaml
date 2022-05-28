@@ -1,6 +1,12 @@
-# action.yaml
-name: "Blog Custom Github Action"
-description: "Call an API and get the result"
+name: 'Airmeet Github Action'
+description: 'Foundation for CI/CD on Github Action'
+inputs:
+  OPERATION:
+    description: 'The operation to perform'
+    required: true
+  ENVIRONMENT:
+    description: 'The environment to deploy to'
+    required: true
 runs:
-  using: "docker"
-  image: "Dockerfile"
+  using: 'docker'
+  main: 'Dockerfile'
