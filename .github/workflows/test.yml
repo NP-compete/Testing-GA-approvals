@@ -2,14 +2,79 @@ name: CI/CD
 
 on:
   workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        description: 'The environment to deploy to'
+        required: true
+        type: choice
+        options: ['dev', 'stage', 'release', 'qa', 'preprod', 'prod']
+        default: 'dev'
+      OPERATION:
+        description: 'Operation'
+        required: true
+        type: choice
+        options: ['build', 'deploy']
+        default: 'build'
+      REGION:
+        description: 'The AWS region to run in'
+        type: choice
+        required: true
+        options: ['us-west-2', 'eu-west-1']
+        default: 'eu-west-1'
+      ARTIFACT_KEY:
+        description: 'The S3 key of the artifact to deploy'
+        required: false
+        type: string
+        default: ''
+
+env:
+    ENVIRONMENT: ${{ github.event.inputs.ENVIRONMENT }}
+    OPERATION: ${{ github.event.inputs.OPERATION }}
+    REGION: ${{ github.event.inputs.REGION }}
+    SERVICE: ${{ secrets.SERVICE }} # Valid values: ["notif", "zeus"]
+    DEPLOYMENT_ARTIFACT: ${{ github.event.inputs.ARTIFACT_KEY }}
+    BUILD_DISABLED: ${{ secrets.BUILD_DISABLED }}
 
 jobs:
-
+  Checkout:
+     runs-on : ubuntu-latest
+     steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+  AWS_Login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        if: env.ENVIRONMENT == 'dev'
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_STAGE }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY_STAGE }}
+          aws-region: ${{ env.REGION }}
   Build:
+    if: env.OPERATION == 'build' && env.BUILD_DISABLED != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN_GITHUB }}
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
       - name: Trigger CodeBuild
-        run: echo "Triggering CodeBuild"
+        run: |
+          aws codebuild update-project --name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --source-version '${{ steps.extract_branch.outputs.branch }}'
+          aws codebuild start-build --project-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --region='${{ env.REGION }}'
+      
+  Deploy_with_Artifact:
+     if: env.OPERATION == 'deploy' and env.DEPLOYMENT_ARTIFACT != ''
+     runs-on : ubuntu-latest
+     steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Trigger CodeDeploy
+        run: aws deploy create-deployment --application-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-app' --deployment-group-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-deployment-group' --s3-location bucket='${{ env.ENVIRONMENT }}-${{ env.REGION }}-artifact-bucket',key='${{ env.DEPLOYMENT_ARTIFACT }}',bundleType=zip --region='${{ github.event.inputs.REGION }}'
+      
