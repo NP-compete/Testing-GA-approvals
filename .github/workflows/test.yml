@@ -58,8 +58,6 @@ jobs:
     if: ${{ github.event.inputs.OPERATION  == 'build' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout codebase
-        uses: actions/checkout@v3
       - name: Extract branch name
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
