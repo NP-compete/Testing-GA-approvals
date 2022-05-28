@@ -28,6 +28,9 @@ on:
         default: ''
 
 env:
+    ENVIRONMENT: ${{ github.event.inputs.ENVIRONMENT }}
+    OPERATION: ${{ github.event.inputs.OPERATION }}
+    REGION: ${{ github.event.inputs.REGION }}
     SERVICE: ${{ secrets.SERVICE }} # Valid values: ["notif", "zeus"]
     DEPLOYMENT_ARTIFACT: ${{ github.event.inputs.ARTIFACT_KEY }}
     BUILD_DISABLED: ${{ secrets.BUILD_DISABLED }}
