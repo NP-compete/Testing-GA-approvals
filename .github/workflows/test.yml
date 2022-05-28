@@ -52,6 +52,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_STAGE }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY_STAGE }}
           aws-region: ${{ env.REGION }}
+          
   Build:
     if: '${{ env.OPERATION }}' == 'build'] && ['${{ env.BUILD_DISABLED }}' != 'true'
     runs-on: ubuntu-latest
