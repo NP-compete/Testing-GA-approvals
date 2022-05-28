@@ -53,7 +53,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY_STAGE }}
           aws-region: ${{ env.REGION }}
   Build:
-    if: ${{ env.OPERATION }} == 'build' && ${{ env.BUILD_DISABLED }} != 'true'
+    if: '${{ env.OPERATION }}' == 'build'] && ['${{ env.BUILD_DISABLED }}' != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -69,7 +69,7 @@ jobs:
           aws codebuild start-build --project-name '${{ env.ENVIRONMENT }}-${{ env.REGION }}-${{ env.SERVICE }}-project' --region='${{ env.REGION }}'
       
   Deploy_with_Artifact:
-     if: ${{ env.OPERATION }} == 'deploy' and ${{ env.DEPLOYMENT_ARTIFACT }} != ''
+     if: '${{ env.OPERATION }}' == 'deploy' && '${{ env.DEPLOYMENT_ARTIFACT }}' != ''
      runs-on : ubuntu-latest
      steps:
       - uses: actions/checkout@v3
